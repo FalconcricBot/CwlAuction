@@ -29,6 +29,7 @@ from keyboards.auction import (
 from services import auction_service, bidding_service, lobby_service
 from utils.helpers import fmt_money, is_admin, player_display_name
 from utils.logger import get_logger
+from utils.media import send_announcement
 from utils.timers import seconds_remaining
 
 logger = get_logger(__name__)
@@ -395,7 +396,8 @@ async def _send_sold_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int, r
         f"💰 Sold Price:\n{fmt_money(price)}\n\n"
         f"💰 Remaining Purse:\n{fmt_money(team['remaining_purse'])}"
     )
-    await context.bot.send_message(chat_id, text, parse_mode="HTML")
+    if not await send_announcement(context, chat_id, "sold", text):
+        await context.bot.send_message(chat_id, text, parse_mode="HTML")
 
 
 async def _send_unsold_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int, result: dict) -> None:
@@ -408,7 +410,8 @@ async def _send_unsold_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int,
         f"💰 Base Price:\n{fmt_money(player['base_price'])}\n\n"
         "No valid bids received."
     )
-    await context.bot.send_message(chat_id, text, parse_mode="HTML")
+    if not await send_announcement(context, chat_id, "unsold", text):
+        await context.bot.send_message(chat_id, text, parse_mode="HTML")
 
 
 async def _send_set_completed_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int,
